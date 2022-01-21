@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PagedList;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,13 +46,18 @@ namespace Transfer.Data
             _context.Commands.Remove(cmd);
         }
 
-        public IEnumerable<Command> GetAllCommands()
+        public IEnumerable<Command> GetAllCommands(int p)
         {
-            return _context.Commands.ToList();
+            return _context.Commands.ToPagedList(p,10);
         }
         public Command GetCommandById(int Id)
         {
             return _context.Commands.FirstOrDefault(p => p.id == Id);
+        }
+        public IEnumerable<Command> GetCommandBySearch(string search, int p)
+        {
+
+            return _context.Commands.Where(p => p.name.Contains(search) || p.desc.Contains(search)).ToPagedList(p,10);
         }
 
         public bool SaveChanges()

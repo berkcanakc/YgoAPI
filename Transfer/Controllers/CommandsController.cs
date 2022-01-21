@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 namespace Transfer.Controllers
 {
 
-    [Route("api/commands")]
+    [Route("api")]
     [ApiController]
     public class CommandsController : ControllerBase
     {
@@ -28,15 +28,16 @@ namespace Transfer.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        //GET api/commands
-        [HttpGet]
-        public ActionResult<IEnumerable<CommandReadDto>> GetAllCommmands()
+        //GET api
+        [HttpGet("{p}")]
+        public ActionResult<IEnumerable<CommandReadDto>> GetAllCommmands(int p=1)
         {
-            var commandItems = _repository.GetAllCommands();
+            var commandItems = _repository.GetAllCommands(p);
             return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(commandItems));
         }
-        //GET api/commands/{id}
-        [HttpGet("{id}")]
+        //GET api/id/{id}
+        
+        [HttpGet("id/{id}")]
         public ActionResult<CommandReadDto> GetCommandById(int id)
         {
             var commandItem = _repository.GetCommandById(id);
@@ -46,22 +47,33 @@ namespace Transfer.Controllers
             }
             return NotFound();
         }
-        //POST api/commands
-        [HttpPost]
+        //GET api/search/{id}/{p}
+        [HttpGet("search/{search}/{p}")]
+        public ActionResult<CommandReadDto> GetCommandBySearch(string search, int p = 1)
+        {
+            var commandItem = _repository.GetCommandBySearch(search, p);
+            if (commandItem != null)
+            {
+                return Ok(commandItem);
+            }
+            return NotFound();
+        }
+            //POST api/commands
+            [HttpPost]
         public ActionResult<CommandReadDto> CreateCommand(CommandCreateDto commandCreateDto)
         {
             var commandModel = _mapper.Map<Command>(commandCreateDto);
             _repository.CreateCommand(commandModel);
             _repository.SaveChanges();
 
-            /*var commandReadDto = _mapper.Map<CommandReadDto>(commandModel);
+          /*  var commandReadDto = _mapper.Map<CommandReadDto>(commandModel);
 
             return CreatedAtRoute(nameof(GetCommandById), new { commandReadDto.Id }, commandReadDto);*/
             return Ok(commandModel);
         }
 
         [HttpPost("update")]
-        public ActionResult<CommandReadDto> Dbupdate(CommandCreateDto commandCreateDto)
+        public ActionResult<CommandReadDto> Dbupdate()
         {
             string ContentRootPath = _webHostEnvironment.ContentRootPath;
             string path = Path.Combine(ContentRootPath, "Veriler", "db.JSON");
