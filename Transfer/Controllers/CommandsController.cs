@@ -29,11 +29,22 @@ namespace Transfer.Controllers
         }
 
         //GET api
-        [HttpGet("{p}")]
-        public ActionResult<IEnumerable<CommandReadDto>> GetAllCommmands(int p=1)
+        [HttpGet("cards")]
+        public ActionResult<IEnumerable<CommandReadDto>> GetAllCommmands([FromQuery] PaginationParams pageparams)
         {
-            var commandItems = _repository.GetAllCommands(p);
-            return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(commandItems));
+            var items = _repository.GetAllCommands(pageparams);
+
+            var metadata = new
+            {
+                items.TotalCount,
+                items.PageSize,
+                items.CurrentPage,
+                items.HasNext,
+                items.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(items));
         }
         //GET api/id/{id}
         
@@ -43,21 +54,34 @@ namespace Transfer.Controllers
             var commandItem = _repository.GetCommandById(id);
             if (commandItem != null)
             {
-                return Ok(commandItem);
+                return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(commandItem));
             }
             return NotFound();
         }
         //GET api/search/{id}/{p}
-        [HttpGet("search/{search}/{p}")]
-        public ActionResult<CommandReadDto> GetCommandBySearch(string search, int p = 1)
+        
+        [HttpGet("search={search}")]
+        public ActionResult<CommandReadDto> GetCommandBySearch(string search, [FromQuery] PaginationParams pageparams
+            )
         {
-            var commandItem = _repository.GetCommandBySearch(search, p);
-            if (commandItem != null)
+            var items = _repository.GetCommandBySearch(search, pageparams);
+            var metadata = new
             {
-                return Ok(commandItem);
+                items.TotalCount,
+                items.PageSize,
+                items.CurrentPage,
+                items.HasNext,
+                items.HasPrevious
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            if (items != null)
+            {
+                return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(items));
             }
             return NotFound();
         }
+        
             //POST api/commands
             [HttpPost]
         public ActionResult<CommandReadDto> CreateCommand(CommandCreateDto commandCreateDto)

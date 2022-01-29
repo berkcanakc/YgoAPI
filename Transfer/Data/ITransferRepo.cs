@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Transfer.Dtos;
+using Transfer.Helpers;
 using Transfer.Models;
 
 namespace Transfer.Data
@@ -8,9 +9,9 @@ namespace Transfer.Data
     {
         bool SaveChanges();
 
-        IEnumerable<Command> GetAllCommands(int p);
+        PagedList<Command> GetAllCommands(PaginationParams parameters);
         Command GetCommandById(int Id);
-        IEnumerable<Command> GetCommandBySearch(string search, int p);
+        PagedList<Command> GetCommandBySearch(string search, PaginationParams parameters);
         void CreateCommand(Command cmd);
         void UpdateCommand(Command cmd);
         void DeleteCommand(Command cmd);
